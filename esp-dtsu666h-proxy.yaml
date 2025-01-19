@@ -1,0 +1,95 @@
+### SUBSTITUTIONS ###
+substitutions:
+  device_name: esp-dtsu666h-proxy
+  device_friendly_name: ESP DTSU666-H Modbus Proxy
+  device_update_interval: !input_number.device_update_interval
+  modbus_slave_id1: "0x0B" # 11
+  modbus_slave_id2: "0x0C" # 12
+
+### PACKAGES ###
+packages:
+  wifi: !include common/wifi.yaml # Component ethernet cannot be used together with component wifi.
+  # ethernet: !include common/ethernet.yaml
+  em1_sensors: !include sensors/em1_sensors.yaml
+  em2_sensors: !include sensors/em2_sensors.yaml
+
+### ESPHOME ###
+esphome:
+  name: ${device_name}
+  friendly_name: ${device_friendly_name}
+
+esp32:
+  board: wt32-eth01
+  framework:
+    type: esp-idf # arduino will break the code because of the use of UART0
+
+safe_mode:
+  disabled: false
+  reboot_timeout: 10min
+  num_attempts: 5
+
+### LOGGING ###
+logger: # Enable logging
+  level: DEBUG # Defaults to DEBUG
+  baud_rate: 0 # Must be disabled. See https://esphome.io/components/modbus_controller.html
+  # logs:
+  #   modbus_controller: DEBUG
+
+### HOME ASSISTANT API ###
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+### OTA ###
+ota:
+  platform: esphome
+  password: !secret ota_password
+
+### UART ###
+uart:
+  # Defaults: Parity: None, Stop bits: 1, Flow control: None
+  # UART for energy meter 1 / Grid meter
+  - id: uart_em1
+    tx_pin: GPIO5 # U2TXD
+    rx_pin: GPIO17 # U2RXD
+    baud_rate: 9600
+
+  # UART for energy meter 2 / Third party production meter
+  - id: uart_em2
+    tx_pin: GPIO1 # U0TXD
+    rx_pin: GPIO3 # U0RXD 
+    baud_rate: 9600
+
+### MODBUS ###
+modbus:
+  # Energy meter 1 / Grid meter
+  - uart_id: uart_em1
+    id: modbus_em1
+    role: server
+
+  # Energy meter 2 / Third party production meter
+  - uart_id: uart_em2
+    id: modbus_em2
+    role: server
+
+### SENSORS ###
+sensor:
+  # Uptime
+  - platform: uptime
+    name: Uptime
+
+### BUTTON ###
+button:
+  - platform: restart
+    name: "Restart Device"
+    icon: "mdi:restart"
+
+### INPUT NUMBER ###
+input_number:
+  device_update_interval:
+    name: "Update interval"
+    initial: 30
+    min: 1
+    max: 3600
+    step: 1
+    mode: box

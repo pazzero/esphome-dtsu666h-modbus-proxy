@@ -1,0 +1,518 @@
+### ENERGY METER 2 ###
+# The second energy meter measures a third party / not Huawei generator / inverter
+# https://support.huawei.com/enterprise/de/doc/EDOC1100173562/c79b0469
+
+modbus_controller:
+  - modbus_id: modbus_em2
+    update_interval: ${device_update_interval}
+    address: ${modbus_slave_id2}
+    server_registers:
+      # BLOCK 2001
+      # This block is requested by the inverter to indicate the meter status
+      # Responding 0x3B11 (Dec 15121) indicates an active energy meter
+      - address: 2001
+        value_type: U_WORD
+        read_lambda: |-
+          return 15121;
+
+      # BLOCK 2102
+      # Data registers; Some are inverted (* -1) to simulate production
+      # Currents
+      - address: 2102
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_current_l1).state;
+      - address: 2104
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_current_l2).state;
+      - address: 2106
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_current_l3).state;
+
+      # Voltages
+      - address: 2108
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_voltage_ln).state;
+      - address: 2110
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_voltage_l1n).state;
+      - address: 2112
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_voltage_l2n).state;
+      - address: 2114
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_voltage_l3n).state;
+      - address: 2116
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_voltage_ll).state;
+      - address: 2118
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_voltage_l12).state;
+      - address: 2120
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_voltage_l23).state;
+      - address: 2122
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_voltage_l31).state;
+      
+      # Frequency
+      - address: 2124
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_frequency).state;
+      
+      # Active power
+      - address: 2126
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_active_power).state * -1;
+      - address: 2128
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_active_power_l1).state * -1;
+      - address: 2130
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_active_power_l2).state * -1;
+      - address: 2132
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_active_power_l3).state * -1;
+      
+      # Reactive power
+      - address: 2134
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_reactive_power).state;
+      - address: 2136
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_reactive_power_l1).state;
+      - address: 2138
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_reactive_power_l2).state;
+      - address: 2140
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_reactive_power_l3).state;
+
+      # Apparent power
+      - address: 2142
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_apparent_power).state;
+      - address: 2144
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_apparent_power_l1).state;
+      - address: 2146
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_apparent_power_l2).state;
+      - address: 2148
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_apparent_power_l3).state;
+
+      # Power factors
+      - address: 2150
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_power_factor).state;
+      - address: 2152
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_power_factor_l1).state;
+      - address: 2154
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_power_factor_l2).state;
+      - address: 2156
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_power_factor_l3).state;
+
+      # Active power demand
+      - address: 2158
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_active_power_demand).state * -1;
+      - address: 2160
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_active_power_l1).state * -1;
+      - address: 2162
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_active_power_l2).state * -1;
+      - address: 2164
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_active_power_l3).state * -1;
+
+      # Energy
+      - address: 2166 # Total imported energy
+        value_type: FP32
+        read_lambda: |- # No imported energy to the inverter
+          return 0;
+      - address: 2168 # Imported energy L1
+        value_type: FP32
+        read_lambda: |-
+          return 0;
+      - address: 2170 # Imported energy L2
+        value_type: FP32
+        read_lambda: |-
+          return 0;
+      - address: 2172 # Imported energy L3
+        value_type: FP32
+        read_lambda: |-
+          return 0;
+      - address: 2174 # Total exported energy
+        value_type: FP32
+        read_lambda: |-
+          return id(em2_energy_exported).state;
+      - address: 2176 # Exported energy L1
+        value_type: FP32
+        read_lambda: |-
+          return 0;
+      - address: 2178 # Exported energy L2
+        value_type: FP32
+        read_lambda: |-
+          return 0;
+      - address: 2180  # Exported energy L3
+        value_type: FP32
+        read_lambda: |-
+          return 0;
+
+      # BLOCK 2214
+      # This Block is requested by the inverter and the debug log show's a successfull request.
+      # There's no documentation about the Huawei remapping of this register block.
+      - address: 2214 # Version or serial number?
+        value_type: U_WORD
+        read_lambda: |-
+          return 2024010101;
+      - address: 2215 # Programming password code
+        value_type: U_WORD
+        read_lambda: |-
+          return 0;
+      - address: 2216 # Electric energy zero clearing (0 - no change; 1 - clear)
+        value_type: U_WORD
+        read_lambda: |-
+          return 0;
+      - address: 2217 # Connection mode (0: 3P4W; 1: 3P3W)
+        value_type: U_WORD
+        read_lambda: |-
+          return 0;
+      - address: 2218 # Current transformer ratio (irat)
+        value_type: U_WORD
+        read_lambda: |-
+          return 1;
+      - address: 2219 # Potential transformer ratio (urat)
+        value_type: U_WORD
+        read_lambda: |-
+          return 1;
+      - address: 2220 # Protocol changing over
+        value_type: U_WORD
+        read_lambda: |-
+          return 3;
+      - address: 2221 # Communication meter address (11 - 19)
+        value_type: U_WORD
+        read_lambda: |-
+          return ${modbus_slave_id1};
+      - address: 2222 # Communication baudrate:  0 = 4800, 1 = 9600
+        value_type: U_WORD
+        read_lambda: |-
+          return 1;
+      - address: 2223 # Meter type 0 = single phase, 1 = three phase
+        value_type: U_WORD
+        read_lambda: |-
+          return 1;
+
+
+sensor:
+  # Voltage sensors
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_voltage_ab
+    id: em2_voltage_l12
+    name: "EM2 Voltage L1-L2"
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_voltage_bc
+    id: em2_voltage_l23
+    name: "EM2 Voltage L2-L3"
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_voltage_ca
+    id: em2_voltage_l31
+    name: "EM2 Voltage L3-L1"
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: template
+    id: em2_voltage_ll
+    name: "EM2 Voltage L-L"
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    lambda: |-
+      return (id(em2_voltage_l12).state + id(em2_voltage_l23).state + id(em2_voltage_l31).state) / 3;
+    state_class: measurement
+    internal: true
+    update_interval: ${device_update_interval}
+
+  # Phase to Neutral Voltages
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_voltage_an
+    id: em2_voltage_l1n
+    name: "EM2 Voltage L1-N"
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_voltage_bn
+    id: em2_voltage_l2n
+    name: "EM2 Voltage L2-N"
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_voltage_cn
+    id: em2_voltage_l3n
+    name: "EM2 Voltage L3-N"
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: template
+    id: em2_voltage_ln
+    name: "EM2 Voltage L-N"
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    lambda: |-
+      return (id(em2_voltage_l1n).state + id(em2_voltage_l2n).state + id(em2_voltage_l3n).state) / 3;
+    state_class: measurement
+    internal: true
+    update_interval: ${device_update_interval}
+
+  # Current sensors
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_current_a
+    id: em2_current_l1
+    name: "EM2 Current L1"
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_current_b
+    id: em2_current_l2
+    name: "EM2 Current L2"
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_current_c
+    id: em2_current_l3
+    name: "EM2 Current L3"
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  # Active Power sensors
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_power_a
+    id: em2_active_power_l1
+    name: "EM2 Active Power L1"
+    unit_of_measurement: "W"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_power_b
+    id: em2_active_power_l2
+    name: "EM2 Active Power L2"
+    unit_of_measurement: "W"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_power_c
+    id: em2_active_power_l3
+    name: "EM2 Active Power L3"
+    unit_of_measurement: "W"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_power
+    id: em2_active_power
+    name: "EM2 Active Power"
+    unit_of_measurement: "W"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  # Reactive Power sensors
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_var_a
+    id: em2_reactive_power_l1
+    name: "EM2 Reactive Power L1"
+    unit_of_measurement: "VAR"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_var_b
+    id: em2_reactive_power_l2
+    name: "EM2 Reactive Power L2"
+    unit_of_measurement: "VAR"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_var_c
+    id: em2_reactive_power_l3
+    name: "EM2 Reactive Power L3"
+    unit_of_measurement: "VAR"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_var
+    id: em2_reactive_power
+    name: "EM2 Reactive Power"
+    unit_of_measurement: "VAR"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  # Apparent Power sensors (calculated)
+  - platform: template
+    id: em2_apparent_power_l1
+    name: "EM2 Apparent Power L1"
+    unit_of_measurement: "VA"
+    accuracy_decimals: 1
+    lambda: |-
+      return id(em2_voltage_l1n).state * id(em2_current_l1).state;
+    state_class: measurement
+    update_interval: ${device_update_interval}
+    internal: true
+
+  - platform: template
+    id: em2_apparent_power_l2
+    name: "EM2 Apparent Power L2"
+    unit_of_measurement: "VA"
+    accuracy_decimals: 1
+    lambda: |-
+      return id(em2_voltage_l2n).state * id(em2_current_l2).state;
+    state_class: measurement
+    update_interval: ${device_update_interval}
+    internal: true
+
+  - platform: template
+    id: em2_apparent_power_l3
+    name: "EM2 Apparent Power L3"
+    unit_of_measurement: "VA"
+    accuracy_decimals: 1
+    lambda: |-
+      return id(em2_voltage_l3n).state * id(em2_current_l3).state;
+    state_class: measurement
+    update_interval: ${device_update_interval}
+    internal: true
+
+  - platform: template
+    id: em2_apparent_power
+    name: "EM2 Apparent Power"
+    unit_of_measurement: "VA"
+    accuracy_decimals: 1
+    lambda: |-
+      return (id(em2_apparent_power_l1).state + 
+              id(em2_apparent_power_l2).state + 
+              id(em2_apparent_power_l3).state) / 3.0;
+    state_class: measurement
+    update_interval: ${device_update_interval}
+    internal: true
+
+  # Power Factor sensors
+  - platform: homeassistant
+    entity_id: sensor.solaredge_m1_ac_pf_a
+    id: em2_power_factor_l1
+    name: "EM2 Power Factor L1"
+    accuracy_decimals: 1
+    # filters:
+    #   - multiply: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_m1_ac_pf_b
+    id: em2_power_factor_l2
+    name: "EM2 Power Factor L2"
+    accuracy_decimals: 1
+    # filters:
+    #   - multiply: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_m1_ac_pf_c
+    id: em2_power_factor_l3
+    name: "EM2 Power Factor L3"
+    accuracy_decimals: 1
+    # filters:
+    #   - multiply: 1
+    state_class: measurement
+
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_pf
+    id: em2_power_factor
+    name: "EM2 Power Factor"
+    accuracy_decimals: 1
+    # filters:
+    #   - multiply: 1
+    state_class: measurement
+
+  # Frequency sensor
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_frequency
+    id: em2_frequency
+    name: "EM2 Grid Frequency"
+    unit_of_measurement: "Hz"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  # Energy sensors
+  - platform: homeassistant
+    entity_id: sensor.solaredge_ac_energy_kwh
+    id: em2_energy_exported
+    name: "EM2 Energy Exported"
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 1
+    state_class: measurement
+
+  # Active Power Demand (same as active power total)
+  - platform: template
+    id: em2_active_power_demand
+    name: "EM2 Active Power Demand"
+    unit_of_measurement: "W"
+    accuracy_decimals: 1
+    lambda: |-
+      return id(em2_active_power).state;
+    state_class: measurement
+    update_interval: ${device_update_interval}

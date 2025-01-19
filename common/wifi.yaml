@@ -1,0 +1,22 @@
+### WIFI CONFIG ###
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  domain: .fritz.box
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: ${device_friendly_name} AP
+    password: !secret wifi_ap_password
+
+captive_portal:
+
+sensor:
+  # WiFi RSSI
+  - platform: wifi_signal
+    name: WiFi RSSI
+    unit_of_measurement: "dB"
+    icon: "mdi:signal"
+    device_class: "signal_strength"
+    state_class: "measurement"
